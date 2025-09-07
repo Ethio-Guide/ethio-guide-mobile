@@ -44,14 +44,16 @@ class WorkspaceDiscussionRepositoryImpl implements WorkspaceDiscussionRepository
     required String title,
     required String content,
     required List<String> tags,
-    required String category,
+    required List<String> procedure,
+    // required String category,
   }) async {
     try {
       final result = await remoteDataSource.createDiscussion(
         title: title,
         content: content,
         tags: tags,
-        category: category,
+        procedure: procedure,
+        // category: category,
       );
       return Right(result);
     } catch (e) {
