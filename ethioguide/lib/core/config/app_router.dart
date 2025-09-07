@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ethioguide/core/config/route_names.dart';
+import 'package:ethioguide/features/procedure/domain/entities/procedure_detail.dart';
 
 // Import all your screens
 import 'package:ethioguide/features/splashscreen/presentation/screens/splash_screen.dart';
@@ -22,14 +23,68 @@ import 'package:ethioguide/features/workspace_discussion/presentation/pages/work
 import 'package:ethioguide/features/splashscreen/presentation/screens/placeholder_screen.dart';
 
 
+import 'package:ethioguide/features/AI%20chat/Presentation/screens/ai_chat_screen.dart';
+import 'package:ethioguide/features/onboarding/presentation/screens/onboarding_screen.dart';
+
+import 'package:go_router/go_router.dart';
+import 'package:ethioguide/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:ethioguide/features/splashscreen/presentation/screens/splash_screen.dart';
+import 'package:ethioguide/features/splashscreen/presentation/screens/placeholder_screen.dart';
+import 'package:ethioguide/core/config/route_names.dart';
+
+import '../../features/procedure/presentation/pages/procedure_detail_page.dart';
+import '../../features/procedure/presentation/pages/procedure_page.dart';
+
+// This is the central router configuration for the entire application.
+
 final GoRouter router = GoRouter(
   initialLocation: '/',
+
   routes: [
     // --- STANDALONE ROUTES (No persistent UI like a back button to a shell) ---
     GoRoute(
       path: '/',
       name: RouteNames.splash,
-      builder: (context, state) => const SplashScreen(),
+
+      builder: (context, state) =>
+          const SplashScreen(), // The function that builds the widget for this screen.
+    ),
+
+    GoRoute(
+      path: '/Procedure',
+      name: RouteNames.procedure,
+      builder: (context, state) => const ProcedurePage(),
+      routes: [
+        GoRoute(
+          path: 'detail',
+          name: RouteNames.procedure_detail,
+          builder: (context, state) => const ProcedureDetailPage(),
+        ),
+      ], // The function that builds the widget for this screen.
+    ),
+
+    GoRoute(
+      path: '/workspace',
+      name: RouteNames.workspace,
+      builder: (context, state) => const WorkspacePage(),
+      routes: [
+        GoRoute(
+          path: 'detail',
+          name: RouteNames.workspace_detail,
+          builder: (context, state) {
+            final procedure = state.extra as ProcedureDetail;
+            return WorkspaceProcedureDetailPage(procedureDetail: procedure);
+          },
+        ),
+      ], // The function that builds the widget for this screen.
+    ),
+
+    GoRoute(
+      path: '/discussion',
+      name: RouteNames.workspacediscussion,
+      builder: (context, state) =>
+          const WorkspaceDiscussionPage(), // The function that builds the widget for this screen.
+
     ),
     GoRoute(
       path: '/onboarding',
@@ -39,7 +94,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/auth',
       name: RouteNames.auth,
-      builder: (context, state) => AuthScreen(verificationToken: state.uri.queryParameters['token']),
+
+      builder: (context, state) =>
+          AuthScreen(verificationToken: state.uri.queryParameters['token']),
+
     ),
     // This deep link for password reset is a special case and should be top-level.
     GoRoute(
@@ -52,8 +110,6 @@ final GoRouter router = GoRouter(
     ),
 
 
-    // --- MAIN APPLICATION SHELL ---
-    // All routes nested here will have a consistent back stack leading to the home screen.
     GoRoute(
       path: '/home',
       name: RouteNames.home,

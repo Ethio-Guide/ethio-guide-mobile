@@ -1,5 +1,8 @@
 import 'package:ethioguide/core/config/app_color.dart';
+import 'package:ethioguide/features/workspace_discussion/presentation/bloc/workspace_discussion_bloc.dart';
+import 'package:ethioguide/features/workspace_discussion/presentation/bloc/worspace_discustion_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Page for creating a new discussion
 class CreateDiscussionPage extends StatefulWidget {
@@ -52,14 +55,19 @@ class _CreateDiscussionPageState extends State<CreateDiscussionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  
-                  children: [
-                    const Text('Create New Discussion', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
 
-                ],),
+                  children: [
+                    const Text(
+                      'Create New Discussion',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
 
                 SizedBox(height: 15),
                 // Instructions
@@ -206,7 +214,6 @@ class _CreateDiscussionPageState extends State<CreateDiscussionPage> {
                   decoration: InputDecoration(
                     hintText: 'e.g., passport, documents, renewal',
                     border: OutlineInputBorder(
-      
                       borderRadius: BorderRadius.circular(8),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
@@ -309,20 +316,69 @@ class _CreateDiscussionPageState extends State<CreateDiscussionPage> {
           .map((tag) => tag.trim())
           .where((tag) => tag.isNotEmpty)
           .toList();
-      // Local UI-only submit preview
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Posted (local UI only): ${_titleController.text.trim()}',
-          ),
+
+    context.read<WorkspaceDiscussionBloc>().add(
+  CreateDiscussionEvent(
+    title: _titleController.text.trim(),
+    content: _contentController.text.trim(),
+    tags: tags,
+    procedure: []
+  ),
+);
+
+
+BlocListener<WorkspaceDiscussionBloc, WorkspaceDiscussionState>(
+  listener: (context, state) {
+    if (state is ActionSuccess) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Success'),
+          content: const Text('Discussion created successfully!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
-      Navigator.pop(context, {
-        'title': _titleController.text.trim(),
-        'content': _contentController.text.trim(),
-        'category': _selectedCategory,
-        'tags': tags,
-      });
+    } else if (state is ActionFailure) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Error'),
+          content: Text(state.message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  },
+  child: Container(), // <-- keep your page/form here
+);
+
+   
+
+
+      // Local UI-only submit preview
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(
+      //       'Posted (local UI only): ${_titleController.text.trim()}',
+      //     ),
+      //   ),
+      // );
+      // Navigator.pop(context, {
+      //   'title': _titleController.text.trim(),
+      //   'content': _contentController.text.trim(),
+      //   'category': _selectedCategory,
+      //   'tags': tags,
+      // });
     }
   }
 }

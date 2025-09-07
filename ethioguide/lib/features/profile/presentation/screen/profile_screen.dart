@@ -1,3 +1,4 @@
+import 'package:ethioguide/core/components/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -25,6 +26,7 @@ class ProfileScreen extends StatelessWidget {
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
+  final int pageIndex = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +42,18 @@ class ProfileView extends StatelessWidget {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('My Profile', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 20)),
-            Text('Manage your account information', style: TextStyle(color: Colors.grey, fontSize: 14)),
+            Text(
+              'My Profile',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              'Manage your account information',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
           ],
         ),
         actions: [
@@ -80,7 +92,10 @@ class ProfileView extends StatelessWidget {
           
           if (state.status == ProfileStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.errorMessage),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -95,6 +110,10 @@ class ProfileView extends StatelessWidget {
           // Show an empty state or an error message if the user is null
           return const Center(child: Text('Could not load profile.'));
         },
+      ),
+      bottomNavigationBar: bottomNav(
+        context: context,
+        selectedIndex: pageIndex,
       ),
     );
   }
@@ -145,7 +164,10 @@ class _ProfileHeaderCard extends StatelessWidget {
                 radius: 50,
                 backgroundColor: AppColors.darkGreenColor,
                 // Display the user's initials as a fallback
-                child: Text(user.initials, style: const TextStyle(fontSize: 40, color: Colors.white)),
+                child: Text(
+                  user.initials,
+                  style: const TextStyle(fontSize: 40, color: Colors.white),
+                ),
                 // TODO: Add logic to show user.profilePicture if it's not null
               ),
               Positioned(
@@ -154,17 +176,28 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[300],
                   child: IconButton(
-                    icon: const Icon(Icons.camera_alt_outlined, color: Colors.black54),
-                    onPressed: () { /* TODO: Implement image picker */ },
+                    icon: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.black54,
+                    ),
+                    onPressed: () {
+                      /* TODO: Implement image picker */
+                    },
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Text(user.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(
+            user.name,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 4),
-          Text('Member since $memberSince', style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          Text(
+            'Member since $memberSince',
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -221,6 +254,7 @@ class _PersonalInfoCardState extends State<_PersonalInfoCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -253,6 +287,7 @@ class _PersonalInfoCardState extends State<_PersonalInfoCard> {
                           },
                         ),
                 ],
+
               ),
               const SizedBox(height: 16),
               _EditableInfoRow(label: 'Full Name', controller: _nameController, isEditing: isEditing),
@@ -262,8 +297,10 @@ class _PersonalInfoCardState extends State<_PersonalInfoCard> {
               _EditableInfoRow(label: 'Username', controller: _usernameController, isEditing: isEditing),
             ],
           ),
+
         );
       },
+
     );
   }
 }
@@ -286,6 +323,7 @@ class _EditableInfoRow extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
         const SizedBox(height: 4),
+
         isEditing
             ? TextFormField(
                 controller: controller,
@@ -296,6 +334,7 @@ class _EditableInfoRow extends StatelessWidget {
                 controller.text,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
+
       ],
     );
   }
