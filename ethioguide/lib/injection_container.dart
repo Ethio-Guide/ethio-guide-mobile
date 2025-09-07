@@ -44,7 +44,8 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:ethioguide/features/home_screen/data/repositories/home_repository_impl.dart';
 import 'package:ethioguide/features/home_screen/domain/repositories/home_repository.dart';
 import 'package:ethioguide/features/home_screen/domain/usecases/get_home_data.dart';
-
+import 'package:ethioguide/features/splashscreen/presentation/bloc/splash_bloc.dart';
+import 'package:ethioguide/features/authentication/domain/usecases/check_auth_status.dart';
 
 
 final sl = GetIt.instance;
@@ -57,6 +58,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ForgotPassword(sl()));
   sl.registerLazySingleton(() => ResetPassword(sl()));
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
+  sl.registerFactory(() => SplashBloc(checkAuthStatus: sl()));
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl(), secureStorage: sl(), networkInfo: sl()));
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(dio: sl()));
   
@@ -97,6 +99,7 @@ Future<void> init() async {
    sl.registerLazySingleton(() => VerifyAccount(sl()));
    sl.registerLazySingleton(() => UpdatePassword(sl()));
    sl.registerLazySingleton(() => UpdateProfile(sl()));
+   sl.registerLazySingleton(() => CheckAuthStatus(sl())); 
 
   // Repositories
   sl.registerLazySingleton<AiRepository>(
