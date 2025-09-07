@@ -14,11 +14,12 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      // Use GetIt to create the ProfileBloc and add the initial event to fetch data
-      create: (context) => GetIt.instance<ProfileBloc>()..add(FetchProfileData()),
-      child: const ProfileView(),
-    );
+    
+     context.read<ProfileBloc>().add(FetchProfileData());
+    
+    // It directly returns the view.
+    return const ProfileView();
+    
   }
 }
 
@@ -51,8 +52,16 @@ class ProfileView extends StatelessWidget {
                 // Dispatch the logout event when the user selects 'Logout'
                 context.read<ProfileBloc>().add(LogoutTapped());
               }
+              if (value == 'change_password') {
+      // Use pushNamed to navigate to the child route
+      context.pushNamed('change_password');
+    }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+               const PopupMenuItem<String>(
+      value: 'change_password',
+      child: Text('Change Password'),
+    ),
               const PopupMenuItem<String>(
                 value: 'logout',
                 child: Text('Logout'),
@@ -68,6 +77,7 @@ class ProfileView extends StatelessWidget {
             // Use `go` to clear the navigation stack and send the user to the auth screen
             context.go('/auth');
           }
+          
           if (state.status == ProfileStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
@@ -161,48 +171,113 @@ class _ProfileHeaderCard extends StatelessWidget {
   }
 }
 
-class _PersonalInfoCard extends StatelessWidget {
+class _PersonalInfoCard extends StatefulWidget {
   final User user;
   const _PersonalInfoCard({required this.user});
 
   @override
+  State<_PersonalInfoCard> createState() => _PersonalInfoCardState();
+}
+
+class _PersonalInfoCardState extends State<_PersonalInfoCard> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _usernameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user.name);
+    _emailController = TextEditingController(text: widget.user.email);
+    _usernameController = TextEditingController(text: widget.user.username ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        final bool isEditing = state.isEditing;
+
+        if (state.status == ProfileStatus.success) {
+          _nameController.text = state.user?.name ?? '';
+          _emailController.text = state.user?.email ?? '';
+          _usernameController.text = state.user?.username ?? '';
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: AppColors.darkGreenColor),
-                onPressed: () { /* TODO: Implement edit profile navigation */ },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  isEditing
+                      ? Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                              onPressed: () {
+                                context.read<ProfileBloc>().add(EditModeCancelled());
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.save_alt_outlined, color: Colors.green),
+                              onPressed: () {
+                                context.read<ProfileBloc>().add(ProfileSaveChanges(
+                                  name: _nameController.text,
+                                  email: _emailController.text,
+                                  username: _usernameController.text,
+                                ));
+                              },
+                            ),
+                          ],
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.edit_outlined, color: AppColors.darkGreenColor),
+                          onPressed: () {
+                            context.read<ProfileBloc>().add(EditModeToggled());
+                          },
+                        ),
+                ],
               ),
+              const SizedBox(height: 16),
+              _EditableInfoRow(label: 'Full Name', controller: _nameController, isEditing: isEditing),
+              const Divider(height: 32),
+              _EditableInfoRow(label: 'Email Address', controller: _emailController, isEditing: isEditing),
+              const Divider(height: 32),
+              _EditableInfoRow(label: 'Username', controller: _usernameController, isEditing: isEditing),
             ],
           ),
-          const SizedBox(height: 16),
-          _InfoRow(label: 'Full Name', value: user.name),
-          const Divider(height: 32),
-          _InfoRow(label: 'Email Address', value: user.email),
-          const Divider(height: 32),
-          // TODO: Add the real phone number when available
-          _InfoRow(label: 'Phone Number', value: '+251 91 123 4567'), 
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
+class _EditableInfoRow extends StatelessWidget {
   final String label;
-  final String value;
-  const _InfoRow({required this.label, required this.value});
+  final TextEditingController controller;
+  final bool isEditing;
+
+  const _EditableInfoRow({
+    required this.label,
+    required this.controller,
+    required this.isEditing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +286,16 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        isEditing
+            ? TextFormField(
+                controller: controller,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                decoration: const InputDecoration(isDense: true, border: InputBorder.none),
+              )
+            : Text(
+                controller.text,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
       ],
     );
   }

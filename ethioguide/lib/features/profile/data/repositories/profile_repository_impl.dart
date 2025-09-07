@@ -42,4 +42,47 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(const CachedFailure(message: 'Failed to clear tokens.'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.updatePassword(
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+        );
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(NetworkFailure());
+    }
+  }
+   @override
+  Future<Either<Failure, User>> updateProfile({
+    String? name,
+    String? email,
+    String? username,
+    String? profilePicURL,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final updatedUser = await remoteDataSource.updateProfile(
+          name: name,
+          email: email,
+          username: username,
+          profilePicURL: profilePicURL,
+        );
+        return Right(updatedUser);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      }
+    } else {
+      return Left(NetworkFailure());
+    }
+  }
 }

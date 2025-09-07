@@ -1,5 +1,9 @@
 import 'package:ethioguide/features/authentication/presentation/widgets/reset_password_view.dart';
+import 'package:ethioguide/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ethioguide/features/profile/presentation/screen/update_password_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ethioguide/core/config/route_names.dart';
 
@@ -59,9 +63,22 @@ final GoRouter router = GoRouter(
         // To navigate to them, you use their path RELATIVE to the parent.
         // e.g., context.push('/home/profile') or context.pushNamed('profile')
         GoRoute(
-          path: 'profile', // No leading '/'
+          path: 'profile',
           name: 'profile',
-          builder: (context, state) => const ProfileScreen(),
+          builder: (context, state) => BlocProvider(
+            create: (context) => GetIt.instance<ProfileBloc>(),
+            child: const ProfileScreen(),
+          ),
+          routes: [
+            GoRoute(
+              path: 'change-password',
+              name: 'change_password',
+              builder: (context, state) => BlocProvider(
+                create: (context) => GetIt.instance<ProfileBloc>(),
+                child: const UpdatePasswordScreen(),
+              ),
+            ),
+          ],
         ),
         GoRoute(
           path: 'aiChat', // No leading '/'

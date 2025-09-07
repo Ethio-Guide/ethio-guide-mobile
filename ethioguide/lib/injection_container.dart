@@ -17,6 +17,8 @@ import 'package:ethioguide/features/profile/data/repositories/profile_repository
 import 'package:ethioguide/features/profile/domain/repositories/profile_repository.dart';
 import 'package:ethioguide/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:ethioguide/features/profile/domain/usecases/logout_user.dart';
+import 'package:ethioguide/features/profile/domain/usecases/update_password.dart';
+import 'package:ethioguide/features/profile/domain/usecases/update_profile.dart';
 import 'package:ethioguide/features/profile/presentation/bloc/profile_bloc.dart';
 // REMOVED: No longer need to import google_sign_in here.
 
@@ -77,6 +79,8 @@ Future<void> init() async {
     () => ProfileBloc(
       getUserProfile: sl(),
       logoutUser: sl(),
+      updatePassword: sl(),
+      updateProfile: sl(),
     ),
   );
 
@@ -91,6 +95,8 @@ Future<void> init() async {
    sl.registerLazySingleton(() => GetUserProfile(sl()));
   sl.registerLazySingleton(() => LogoutUser(sl()));
    sl.registerLazySingleton(() => VerifyAccount(sl()));
+   sl.registerLazySingleton(() => UpdatePassword(sl()));
+   sl.registerLazySingleton(() => UpdateProfile(sl()));
 
   // Repositories
   sl.registerLazySingleton<AiRepository>(
