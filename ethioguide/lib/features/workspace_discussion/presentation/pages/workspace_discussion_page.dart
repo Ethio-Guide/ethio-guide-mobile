@@ -37,7 +37,7 @@ class _WorkspaceDiscussionPageState extends State<WorkspaceDiscussionPage> {
     totalMembers: 100,
     totalDiscussions: 150,
     activeToday: 10,
-    trendingTags: ['license', 'process', 'All'],
+    trendingTags: ['tax', 'business','passport', 'All'],
   );
 
 

@@ -66,9 +66,10 @@ class MyApp extends StatelessWidget {
 }
 
 
-// fead back give page
-// detail of my discustion
+// save procedure 
+// from procedure to discustion
+// check Navigation 
+// circular
 
 
-// test with phone 
-// check procedure detail
+// feedback

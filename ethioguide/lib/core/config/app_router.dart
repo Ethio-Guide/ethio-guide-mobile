@@ -34,7 +34,7 @@ import '../../features/procedure/presentation/pages/procedure_page.dart';
 // This is the central router configuration for the entire application.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/auth',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',

@@ -56,7 +56,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
+         /*      const SizedBox(height: 12),
               const WorkspaceSummaryCards(
                 summary: WorkspaceSummary(
                   totalProcedures: 0,
@@ -64,9 +64,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
                   completed: 0,
                   totalDocuments: 0,
                 ),
-              ),
+              ), */
               const SizedBox(height: 24),
-              WorkspaceFilters(
+             /*  WorkspaceFilters(
                 selectedStatus: selectedStatus,
                 selectedOrganization: selectedOrganization,
                 onStatusChanged: (status) {
@@ -86,7 +86,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
                   }
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 24), */
 
               BlocBuilder<
                 WorkspaceProcedureDetailBloc,
