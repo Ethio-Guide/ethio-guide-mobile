@@ -3,7 +3,6 @@
 EthioGuide is a modern, AI-powered mobile application designed to simplify Ethiopia's complex government procedures for its citizens. Built with Flutter, it provides a clean, user-friendly interface for users to get step-by-step guidance on administrative tasks, making bureaucracy accessible and empowering Ethiopians to handle official matters with confidence.
 
 ![App Screenshot](./ethioguide/assets/images/light_logo.jpg) 
-*(Note: Replace the placeholder with a real screenshot of your app's home or auth screen)*
 
 ---
 
