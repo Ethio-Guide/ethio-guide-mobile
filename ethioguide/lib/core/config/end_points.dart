@@ -1,12 +1,11 @@
 class EndPoints {
-  static final baseUrl = 'https://ethio-guide-backend.onrender.com/api/v1/';
+  static final baseUrl = 'https://ethio-guide-backend-1.onrender.com//api/v1/';
   static final refreshTokenEndPoint = '/auth/refresh';
   static final sendQueryEndPoint = '/ai/guide';
   static final getHistoryEndPoint = '/ai/history';
   static final translateContentEndPoint = '/translate';
   static final createDiscussionEndPoint = 'discussions';
   static final getDiscussionsEndPoint = 'discussions';
-
 
   static final registerEndPoint = '/auth/register';
   static final loginEndPoint = '/auth/login';
@@ -20,5 +19,4 @@ class EndPoints {
   static const String updatePassword = '/auth/me/password';
 
   // static final translateContentEndPoint = 'ai/translate';
-
 }
