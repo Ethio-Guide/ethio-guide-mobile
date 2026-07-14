@@ -18,7 +18,6 @@ import 'package:ethioguide/features/procedure/presentation/pages/workspace_proce
 import 'package:ethioguide/features/workspace_discussion/presentation/pages/workspace_discussion_page.dart';
 import 'package:ethioguide/features/splashscreen/presentation/screens/placeholder_screen.dart';
 
-
 import 'package:ethioguide/features/AI%20chat/Presentation/screens/ai_chat_screen.dart';
 import 'package:ethioguide/features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -34,7 +33,7 @@ import '../../features/procedure/presentation/pages/procedure_page.dart';
 // This is the central router configuration for the entire application.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/auth',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
@@ -51,9 +50,8 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/auth',
       name: RouteNames.auth,
-      builder: (context, state) => AuthScreen(
-        verificationToken: state.uri.queryParameters['token'],
-      ),
+      builder: (context, state) =>
+          AuthScreen(verificationToken: state.uri.queryParameters['token']),
       routes: [
         GoRoute(
           path: 'reset-password',
@@ -65,8 +63,6 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-
-
 
     GoRoute(
       path: '/home',
