@@ -28,8 +28,7 @@ class ProcedurePage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: Expanded(
-          child: Padding(
+        title: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 4.0,
               vertical: 20,
@@ -55,7 +54,6 @@ class ProcedurePage extends StatelessWidget {
               ],
             ),
           ),
-        ),
       ),
 
       body: SingleChildScrollView(

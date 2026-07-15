@@ -33,8 +33,7 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Expanded(
-        child: Container(
+      child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -81,8 +80,8 @@ class InfoCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    
   }
 }
 

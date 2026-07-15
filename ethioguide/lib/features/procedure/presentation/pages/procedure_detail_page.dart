@@ -75,56 +75,13 @@ class _DummyDetailBody extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                BlocListener<ProcedureBloc, ProcedureState>(
-  listener: (context, state) {
-    if (state.errorMessage != null) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: Text(state.errorMessage!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      
-    } else  {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Procedure saved successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () => context.push(RouteNames.workspace),
-              child: const Text('Start Working'),
-            ),
-          ],
-        ),
-      );
-      
-    }
-  },
-  child: CustomButton(
-    text: 'Save Procedure',
-                    icon: Icons.download,
-                    onTap: () {
-                      context.read<ProcedureBloc>().add(
-                        SaveProcedureEvent(procedure.id),
-                      );
-                    }
-  ),
-),
+                _SaveProcedureButton(procedureId: procedure.id),
 
 
                 
 
                 DefaultTabController(
-                  length: 3,
+                  length: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -155,6 +112,75 @@ class _DummyDetailBody extends StatelessWidget {
             );
           }
           return const Center(child: Text('Unknown state'));
+        },
+      ),
+    );
+  }
+}
+
+/// A self-contained button that dispatches [SaveProcedureEvent] and listens
+/// only for state changes triggered by that save action, not for every
+/// state rebuild (which was causing a ModalBarrier to appear on page load).
+class _SaveProcedureButton extends StatefulWidget {
+  final String procedureId;
+  const _SaveProcedureButton({required this.procedureId});
+
+  @override
+  State<_SaveProcedureButton> createState() => _SaveProcedureButtonState();
+}
+
+class _SaveProcedureButtonState extends State<_SaveProcedureButton> {
+  bool _saveRequested = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ProcedureBloc, ProcedureState>(
+      // Only react to state changes after the user explicitly tapped "Save"
+      listenWhen: (previous, current) => _saveRequested,
+      listener: (context, state) {
+        if (state.status == ProcedureStatus.loading) return; // still in flight
+
+        // Reset the flag so unrelated future rebuilds don't retrigger the dialog
+        _saveRequested = false;
+
+        if (state.errorMessage != null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Error'),
+              content: Text(state.errorMessage!),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        } else if (state.status == ProcedureStatus.success) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Success'),
+              content: const Text('Procedure saved successfully!'),
+              actions: [
+                TextButton(
+                  onPressed: () => context.push(RouteNames.workspace),
+                  child: const Text('Start Working'),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+      child: CustomButton(
+        text: 'Save Procedure',
+        icon: Icons.save,
+        onTap: () {
+          _saveRequested = true;
+          context.read<ProcedureBloc>().add(
+            SaveProcedureEvent(widget.procedureId),
+          );
         },
       ),
     );
