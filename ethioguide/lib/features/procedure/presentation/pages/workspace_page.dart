@@ -13,7 +13,7 @@ import 'package:ethioguide/features/procedure/presentation/widgets/workspace_pro
 import 'package:ethioguide/features/procedure/presentation/widgets/workspace_filters.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:ethioguide/injection_container.dart' as di;
 /// Page that displays the workspace with procedures tracking
 class WorkspacePage extends StatefulWidget {
   const WorkspacePage({super.key});
@@ -174,14 +174,20 @@ class _WorkspacePageState extends State<WorkspacePage> {
         final procedure = procedures[index];
         return WorkspaceProcedureCard(
           procedure: procedure,
-          onTap: () {
-
-            //FetchProcedureDetail
-            context.read<WorkspaceProcedureDetailBloc>().add(FetchProcedureDetail(procedure.id));
-            // context.push(RouteNames.workspaceDetail, extra: procedure);
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) =>WorkspaceProcedureDetailPage(
-              procedureDetail: procedure,
-            ) ,));
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (pageContext) => BlocProvider(
+                  create: (context) => di.sl<WorkspaceProcedureDetailBloc>(),
+                  child: WorkspaceProcedureDetailPage(
+                    procedureDetail: procedure,
+                  ),
+                ),
+              ),
+            );
+            if (context.mounted) {
+              context.read<WorkspaceProcedureDetailBloc>().add(const FetchMyProcedures());
+            }
           },
         );
       },

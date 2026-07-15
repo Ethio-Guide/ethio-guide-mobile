@@ -16,13 +16,16 @@ class FetchProcedureDetail extends WorkspaceProcedureDetailEvent {
 }
 
 class UpdateStepStatusevent extends WorkspaceProcedureDetailEvent {
+  final String stepId;
   final String procedureId;
 
-
-  const UpdateStepStatusevent(this.procedureId);
+  const UpdateStepStatusevent({
+    required this.stepId,
+    required this.procedureId,
+  });
 
   @override
-  List<Object?> get props => [procedureId];
+  List<Object?> get props => [stepId, procedureId];
 }
 
 class SaveProgress extends WorkspaceProcedureDetailEvent {

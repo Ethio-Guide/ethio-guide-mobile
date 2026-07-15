@@ -53,28 +53,19 @@ class _StepInstructionsList extends State<StepInstructionsList> {
   }
 }
 
-class _StepItem extends StatefulWidget {
+class _StepItem extends StatelessWidget {
   final MyProcedureStep step;
   final String procedureId;
 
-  const _StepItem({Key? key, required this.step, required this.procedureId})
-    : super(key: key);
-
-  @override
-  State<_StepItem> createState() => _StepItemState();
-}
-
-class _StepItemState extends State<_StepItem> {
-  late bool isChecked;
-
-  @override
-  void initState() {
-    super.initState();
-    isChecked = widget.step.isChecked;
-  }
+  const _StepItem({
+    Key? key,
+    required this.step,
+    required this.procedureId,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final isChecked = step.isChecked;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
@@ -106,49 +97,31 @@ class _StepItemState extends State<_StepItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.step.title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  step.title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
-
                 const SizedBox(height: 8),
               ],
             ),
           ),
 
-          BlocListener<
-            WorkspaceProcedureDetailBloc,
-            WorkspaceProcedureDetailState
-          >(
-            listener: (context, state) {
-              if (state is Stepupdate) {
-                setState(() {
-                  isChecked = state.check;
-                });
-               
+          Checkbox(
+            value: isChecked,
+            onChanged: (value) {
+              if (value != null) {
+                context.read<WorkspaceProcedureDetailBloc>().add(
+                  UpdateStepStatusevent(
+                    stepId: step.id,
+                    procedureId: procedureId,
+                  ),
+                );
               }
             },
-            child: Checkbox(
-              value: isChecked,
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<WorkspaceProcedureDetailBloc>().add(
-                    UpdateStepStatusevent(widget.step.id),
-                  );
-
-                    context.read<WorkspaceProcedureDetailBloc>().add(
-                    FetchProcedureDetail(
-                      widget.procedureId
-                    ),
-                  ); 
-                }
-              },
-              activeColor: Colors.green,
-            ),
+            activeColor: Colors.green,
           ),
-
-          // Toggle button
         ],
       ),
     );

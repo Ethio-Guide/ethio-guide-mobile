@@ -59,12 +59,19 @@ class WorkspaceProcedureDetailBloc
     });
 
     on<UpdateStepStatusevent>((event, emit) async {
-      // Keep last loaded detail, show loading only for update if needed
+      // Show loading spinner or keep current steps while updating
       emit(ProcedureLoading());
-      final result = await procedureDetailRepository.updateStepStatus(event.procedureId);
-      result.fold(
-        (error) => emit(ProcedureError(error)),
-        (success) => emit(Stepupdate(success)),
+      final result = await procedureDetailRepository.updateStepStatus(event.stepId);
+      await result.fold(
+        (error) async => emit(ProcedureError(error)),
+        (success) async {
+          // Fetch the updated checklist detail after successful step update
+          final detailResult = await getProcedureDetail(event.procedureId);
+          detailResult.fold(
+            (error) => emit(ProcedureError(error)),
+            (detail) => emit(ProcedureLoaded(detail)),
+          );
+        },
       );
     });
 

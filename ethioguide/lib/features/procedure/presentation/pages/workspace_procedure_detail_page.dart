@@ -99,11 +99,17 @@ class _ProcedureDetailContent extends StatelessWidget {
             WorkspaceProcedureDetailBloc,
             WorkspaceProcedureDetailState
           >(
+            buildWhen: (previous, current) {
+              return current is ProcedureLoaded || current is ProcedureError || (current is ProcedureLoading && previous is ProcedureInitial);
+            },
             builder: (context, state) {
               int progressPercentage = procedureDetail.progressPercentage;
+              int? completedSteps;
+              int? totalSteps;
+              
               if (state is ProcedureLoaded) {
-                final totalSteps = state.procedureDetail.length;
-                final completedSteps = state.procedureDetail.where((s) => s.isChecked).length;
+                totalSteps = state.procedureDetail.length;
+                completedSteps = state.procedureDetail.where((s) => s.isChecked).length;
                 if (totalSteps > 0) {
                   progressPercentage = ((completedSteps / totalSteps) * 100).round();
                 }
@@ -116,7 +122,11 @@ class _ProcedureDetailContent extends StatelessWidget {
                 progressPercentage: progressPercentage,
               );
 
-              return ProgressOverviewCard(procedureDetail: updatedDetail);
+              return ProgressOverviewCard(
+                procedureDetail: updatedDetail,
+                completedSteps: completedSteps,
+                totalSteps: totalSteps,
+              );
             },
           ),
           const SizedBox(height: 20),
@@ -125,6 +135,9 @@ class _ProcedureDetailContent extends StatelessWidget {
             WorkspaceProcedureDetailBloc,
             WorkspaceProcedureDetailState
           >(
+            buildWhen: (previous, current) {
+              return current is ProcedureLoaded || current is ProcedureError || (current is ProcedureLoading && previous is ProcedureInitial);
+            },
             builder: (context, state) {
               if (state is ProcedureLoading) {
                 return const Center(child: CircularProgressIndicator());

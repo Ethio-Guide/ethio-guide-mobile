@@ -6,16 +6,20 @@ import '../../domain/entities/procedure_detail.dart';
 /// Widget that displays the progress overview of a procedure
 class ProgressOverviewCard extends StatelessWidget {
   final ProcedureDetail procedureDetail;
+  final int? completedSteps;
+  final int? totalSteps;
 
   const ProgressOverviewCard({
     super.key,
     required this.procedureDetail,
+    this.completedSteps,
+    this.totalSteps,
   });
 
   @override
   Widget build(BuildContext context) {
-    // final completedSteps = procedureDetail..steps.where((step) => step.isCompleted).length;
-    // final totalSteps = procedureDetail.steps.length;
+    final finalCompleted = completedSteps ?? 0;
+    final finalTotal = totalSteps ?? 0;
 
     return Card(
       elevation: 2,
@@ -38,12 +42,13 @@ class ProgressOverviewCard extends StatelessWidget {
             // Progress status
             Row(
               children: [
-                /* Text(
-                  '$completedSteps of $totalSteps steps completed',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                if (completedSteps != null && totalSteps != null)
+                  Text(
+                    '$finalCompleted of $finalTotal steps completed',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ), */
                 const Spacer(),
                 Text(
                   '${procedureDetail.progressPercentage}%',
