@@ -11,7 +11,7 @@ import '../widgets/required_documents_list.dart';
 
 /// Page that displays detailed information about a workspace procedure
 
-class WorkspaceProcedureDetailPage extends StatelessWidget {
+class WorkspaceProcedureDetailPage extends StatefulWidget {
   final ProcedureDetail procedureDetail;
 
   const WorkspaceProcedureDetailPage({
@@ -20,15 +20,24 @@ class WorkspaceProcedureDetailPage extends StatelessWidget {
   });
 
   @override
+  State<WorkspaceProcedureDetailPage> createState() => _WorkspaceProcedureDetailPageState();
+}
+
+class _WorkspaceProcedureDetailPageState extends State<WorkspaceProcedureDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WorkspaceProcedureDetailBloc>().add(
+        FetchProcedureDetail(widget.procedureDetail.id),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*  appBar: AppBar(
-        title: Column(children: [
-          
-        ],),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ), */
-      body: _ProcedureDetailContent(procedureDetail: procedureDetail),
+      body: _ProcedureDetailContent(procedureDetail: widget.procedureDetail),
     );
   }
 }
@@ -51,27 +60,33 @@ class _ProcedureDetailContent extends StatelessWidget {
                 onPressed: () {
                   context.pop();
                 },
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
               ),
               const SizedBox(width: 8),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    procedureDetail.procedure.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      procedureDetail.procedure.title,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Complete guide to ${procedureDetail.procedure.title.toLowerCase()} in Ethiopia.',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Complete guide to ${procedureDetail.procedure.title.toLowerCase()} in Ethiopia.',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -79,8 +94,31 @@ class _ProcedureDetailContent extends StatelessWidget {
           // Page title
           const SizedBox(height: 24),
 
-          // Progress Overview Card
-          ProgressOverviewCard(procedureDetail: procedureDetail),
+          // Progress Overview Card (Reactive with BlocBuilder)
+          BlocBuilder<
+            WorkspaceProcedureDetailBloc,
+            WorkspaceProcedureDetailState
+          >(
+            builder: (context, state) {
+              int progressPercentage = procedureDetail.progressPercentage;
+              if (state is ProcedureLoaded) {
+                final totalSteps = state.procedureDetail.length;
+                final completedSteps = state.procedureDetail.where((s) => s.isChecked).length;
+                if (totalSteps > 0) {
+                  progressPercentage = ((completedSteps / totalSteps) * 100).round();
+                }
+              }
+              
+              final updatedDetail = ProcedureDetail(
+                id: procedureDetail.id,
+                procedure: procedureDetail.procedure,
+                status: progressPercentage == 100 ? 'Completed' : 'In Progress',
+                progressPercentage: progressPercentage,
+              );
+
+              return ProgressOverviewCard(procedureDetail: updatedDetail);
+            },
+          ),
           const SizedBox(height: 20),
 
           BlocBuilder<
@@ -101,14 +139,6 @@ class _ProcedureDetailContent extends StatelessWidget {
               return const Center(child: Text('No procedures found'));
             },
           ),
-
-          // Step-by-Step Instructions
-          //StepInstructionsList(procedureDetail: procedureDetail.procedure),
-          // const SizedBox(height: 20),
-
-          // Quick Tips Box
-          // QuickTipsBox(procedureDetail: procedureDetail),
-          // const SizedBox(height: 20),
 
           // Required Documents List
           RequiredDocumentsList(procedureDetail: procedureDetail),

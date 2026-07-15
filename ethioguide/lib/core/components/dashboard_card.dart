@@ -65,18 +65,22 @@ class DashboardCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: AppColors.darkGreenColor, // Assuming you add this to AppColors
+                          color: AppColors.darkGreenColor,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.graycolor, // Assuming you add this
+                          fontSize: 13,
+                          color: AppColors.graycolor,
                         ),
                       ),
                     ],

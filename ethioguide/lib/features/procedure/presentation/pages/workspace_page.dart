@@ -29,6 +29,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WorkspaceProcedureDetailBloc>().add(const FetchMyProcedures());
+    });
   }
 
   @override
@@ -50,64 +53,97 @@ class _WorkspacePageState extends State<WorkspacePage> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () async {},
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              const WorkspaceSummaryCards(
-                summary: WorkspaceSummary(
-                  totalProcedures: 0,
-                  inProgress: 0,
-                  completed: 0,
-                  totalDocuments: 0,
-                ),
-              ),
-              const SizedBox(height: 24),
-              WorkspaceFilters(
-                selectedStatus: selectedStatus,
-                selectedOrganization: selectedOrganization,
-                onStatusChanged: (status) {
-                  /* setState(() => selectedStatus = status);
-                  if (status != null) {
-                    /* context.read<WorkspaceProcedureBloc>().add(
-                      FilterProceduresByStatus(status),
-                    ); */
-                  } */
-                },
-                onOrganizationChanged: (organization) {
-                  setState(() => selectedOrganization = organization);
-                  if (organization != null) {
-                    /* context.read<WorkspaceProcedureBloc>().add(
-                      FilterProceduresByOrganization(organization),
-                    ); */
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
+        onRefresh: () async {
+          context.read<WorkspaceProcedureDetailBloc>().add(const FetchMyProcedures());
+        },
+        child: BlocBuilder<
+          WorkspaceProcedureDetailBloc,
+          WorkspaceProcedureDetailState
+        >(
+          builder: (context, state) {
+            List<ProcedureDetail> procedures = [];
+            bool isLoading = false;
+            String? errorMsg;
 
-              BlocBuilder<
-                WorkspaceProcedureDetailBloc,
-                WorkspaceProcedureDetailState
-              >(
-                builder: (context, state) {
-                  if (state is ProcedureLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is ProcedureError) {
-                    return Text(state.message);
-                    
-                  } else if (state is ProceduresListLoaded) {
-                    return _buildProceduresList(state.procedures);
-                  }
-                  return const Center(child: Text('No procedures found'));
-                },
-              ),
+            if (state is ProcedureLoading) {
+              isLoading = true;
+            } else if (state is ProcedureError) {
+              errorMsg = state.message;
+            } else if (state is ProceduresListLoaded) {
+              procedures = state.procedures;
+            }
 
-              // _buildProceduresList(WorkspaceSampleData.getSampleProcedures()),
-            ],
-          ),
+            // Compute summary dynamically
+            final totalProcedures = procedures.length;
+            final completed = procedures.where((p) {
+              final status = p.status.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+              return status == 'completed';
+            }).length;
+            final inProgress = procedures.where((p) {
+              final status = p.status.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+              return status == 'inprogress' || status == 'notstarted';
+            }).length;
+            int totalDocuments = 0;
+            for (final p in procedures) {
+              totalDocuments += p.procedure.requiredDocuments.length;
+            }
+
+            final summary = WorkspaceSummary(
+              totalProcedures: totalProcedures,
+              inProgress: inProgress,
+              completed: completed,
+              totalDocuments: totalDocuments,
+            );
+
+            // Filter locally by organization if selected
+            var displayedProcedures = procedures;
+            if (selectedOrganization != null) {
+              displayedProcedures = procedures.where((p) {
+                // In a real app we might match organization name, but sample data doesn't have organization on ProcedureDetail.
+                // We'll filter based on a simple stub or match for demonstration.
+                return true; 
+              }).toList();
+            }
+
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  WorkspaceSummaryCards(summary: summary),
+                  const SizedBox(height: 24),
+                  WorkspaceFilters(
+                    selectedStatus: selectedStatus,
+                    selectedOrganization: selectedOrganization,
+                    onStatusChanged: (status) {
+                      setState(() => selectedStatus = status);
+                      if (status != null) {
+                        context.read<WorkspaceProcedureDetailBloc>().add(
+                          FetchProceduresByStatus(status),
+                        );
+                      } else {
+                        context.read<WorkspaceProcedureDetailBloc>().add(
+                          const FetchMyProcedures(),
+                        );
+                      }
+                    },
+                    onOrganizationChanged: (organization) {
+                      setState(() => selectedOrganization = organization);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (errorMsg != null)
+                    Text(errorMsg)
+                  else
+                    _buildProceduresList(displayedProcedures),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

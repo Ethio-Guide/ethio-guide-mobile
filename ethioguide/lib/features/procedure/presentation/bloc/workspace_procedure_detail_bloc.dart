@@ -68,56 +68,22 @@ class WorkspaceProcedureDetailBloc
       );
     });
 
-    /*  on<UpdateStepStatus>((event, emit) async {
-      // Keep last loaded detail, show loading only for update if needed
-      final current = state;
-      final result = await updateStepStatusUseCase(event.procedureId, event.stepId, event.isCompleted);
+    on<FetchProceduresByStatus>((event, emit) async {
+      emit(ProcedureLoading());
+      final result = await getMyProcedureDetails();
       result.fold(
-        (error) => emit(ProcedureError(error)),
-        (success) async {
-          if (success) {
-            // Refresh detail to reflect latest progress
-            final refreshed = await getProcedureDetail(event.procedureId);
-            refreshed.fold(
-              (error) => emit(ProcedureError(error)),
-              (detail) => emit(StepStatusUpdated(detail)),
-            );
-          } else {
-            emit(current);
-          }
+        (failure) => emit(ProcedureError(failure.message)),
+        (procedures) {
+          final filtered = procedures.where((p) {
+            final pStatus = p.status.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+            final eventStatusName = event.status.name.toLowerCase();
+            final eventStatusDisplay = event.status.displayName.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+            return pStatus == eventStatusName || pStatus == eventStatusDisplay;
+          }).toList();
+          emit(ProceduresListLoaded(filtered));
         },
       );
     });
-
-    on<SaveProgress>((event, emit) async {
-      final result = await saveProgressUseCase(event.procedureId);
-      result.fold(
-        (error) => emit(ProcedureError(error)),
-        (success) => emit(ProgressSaved(success)),
-      );
-    });
-
- 
-
-    on<FetchProceduresByStatus>((event, emit) async {
-      emit(ProcedureLoading());
-      final result = await getProceduresByStatus(event.status);
-      result.fold(
-        (failure) => emit(ProcedureError(failure.message)),
-        (procedures) => emit(ProceduresListLoaded(procedures)),
-      );
-    });
-
-
-
-    on<FetchWorkspaceSummary>((event, emit) async {
-      emit(ProcedureLoading());
-      final result = await getWorkspaceSummary();
-      result.fold(
-        (failure) => emit(ProcedureError(failure.message)),
-        (summary) => emit(WorkspaceSummaryLoaded(summary)),
-      );
-    });
-  } */
   }
 }
+
